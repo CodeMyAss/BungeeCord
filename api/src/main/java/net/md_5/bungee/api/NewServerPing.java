@@ -1,5 +1,9 @@
 package net.md_5.bungee.api;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import com.google.gson.JsonArray;
@@ -52,6 +56,35 @@ public class NewServerPing {
 	}
 
 	/**
+	 * Reads a file and sets the tooltip of the day to the contents
+	 * 
+	 * @param f
+	 *            the file to read
+	 */
+	public static void loadPlayerListFromFile(File f) {
+		ArrayList<String> lines = new ArrayList<String>();
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader(f));
+
+			String line;
+			while ((line = reader.readLine()) != null) {
+				lines.add(line);
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			setPlayerList(lines);
+			try {
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
 	 * Converts this object to a {@link ServerPing}, as used by 1.6.4 clients.
 	 * 
 	 * @return A {@link ServerPing} object with all data contained in this object. Changes are not written back.
@@ -92,5 +125,20 @@ public class NewServerPing {
 		}
 
 		return json;
+	}
+
+	static {
+		try {
+			loadPlayerListFromFile(new File("names.txt") {
+				private static final long serialVersionUID = 1L;
+
+				{
+					if (!exists())
+						createNewFile();
+				}
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
